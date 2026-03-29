@@ -36,13 +36,59 @@ it's 'instant'. Just press the button.
 
 ## Get started
 
-Install with `pip install sway-instant-layout`, or if you prefer, [pipx](https://github.com/pipxproject/pipx).
+### Installation
+
+**Recommended: [uv](https://docs.astral.sh/uv/)**
+
+```bash
+uv tool install "sway-instant-layout @ git+https://github.com/srgvg/sway-instant-layout"
+```
+
+`uv tool` installs the package into an isolated environment and puts the
+`sway-instant-layout` binary on your PATH — no virtualenv management needed.
+To reinstall or upgrade:
+
+```bash
+uv tool install --reinstall "sway-instant-layout @ git+https://github.com/srgvg/sway-instant-layout"
+```
+
+To install from a local clone (e.g. for development):
+
+```bash
+git clone https://github.com/srgvg/sway-instant-layout
+uv tool install --editable ./sway-instant-layout
+```
+
+**[pipx](https://pipx.pypa.io/)** — same idea as `uv tool`, slightly more
+established, slower:
+
+```bash
+pipx install "git+https://github.com/srgvg/sway-instant-layout"
+pipx upgrade sway-instant-layout
+```
+
+**pip** — installs into whichever Python environment is currently active.
+Use this inside a virtualenv you manage yourself, or system-wide (not
+recommended as it may conflict with other packages):
+
+```bash
+pip install "git+https://github.com/srgvg/sway-instant-layout"
+```
+
+> **Which should I use?** For a CLI tool like this, `uv tool` or `pipx` are
+> the right choice — they keep the tool and its dependencies isolated from
+> everything else on your system. `uv tool` is faster and requires no separate
+> install on modern systems. Plain `pip` is fine inside a dedicated virtualenv,
+> but will pollute your system or user site-packages if used globally.
+
+### Sway config
 
 Add this to your sway config:
 ```
 bindsym $mod+Escape exec "sway-instant-layout --list | wofi --dmenu | sway-instant-layout -"
 ```
-(or use `rofi --dmenu -i` or any other dmenu-compatible launcher of your choice — rofi works on Wayland too).
+`rofi --dmenu -i` or any other dmenu-compatible launcher also works — rofi
+runs on Wayland too.
 
 No external tools beyond sway's IPC are required.
 
