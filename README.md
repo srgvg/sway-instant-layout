@@ -1,19 +1,24 @@
-# i3-instant-layout
+# sway-instant-layout
 
+Automatic 'list based' layouts for the [sway](https://swaywm.org) window manager.
 
-Automatic 'list based' layouts for the [i3](https://i3wm.org) window manager
+## Attribution
+
+This project is a fork of [i3-instant-layout](https://github.com/TyberiusPrime/i3-instant-layout) by TyberiusPrime (Florian Finkernagel), forked at commit [`0d6a983`](https://github.com/TyberiusPrime/i3-instant-layout/commit/0d6a983dd06dce8f666982870ef765e1bbade6bb).
+
+The original tool targets i3 (X11). This fork ports it to sway (Wayland) by replacing the `xdotool` unmap/remap + i3 window-swallow mechanism with direct sway IPC window repositioning via the scratchpad.
 
 ## Status
-I consider this essentially finished. Since I'm no longer using i3 (I'm on niri these days), there will be no further updates from my side.
+
+Beta. The core layout logic is unchanged from the original. The sway-specific window placement mechanism (scratchpad + split/focus IPC commands) is new and may have edge cases. Testing and bug reports welcome.
 
 ## Animated summary
-![Demo of i3-instant-layout](https://github.com/TyberiusPrime/i3-instant-layout/raw/master/docs/_static/i3-instant-layout_demo.gif "i3-instant-layout demo")
 
+![Demo of i3-instant-layout](https://github.com/TyberiusPrime/i3-instant-layout/raw/master/docs/_static/i3-instant-layout_demo.gif "i3-instant-layout demo (from original i3 version)")
 
 ## Description
 
-This python program drags i3 into the 'managed layouts
-tiling window manager world' kicking and screaming.
+This python program drags sway into the 'managed layouts tiling window manager world' kicking and screaming.
 
 What it does is apply a window layout to your current workspace,
 like this one:
@@ -26,22 +31,25 @@ like this one:
     |     |  4  |
     -------------
 
-The big advantage here  is that it needs no 'swallow' definitions whatsoever,
-it's 'instant' - just add milk, eh, press the button.
+The big advantage here is that it needs no pre-configuration whatsoever —
+it's 'instant'. Just press the button.
 
 ## Get started
-i3-instant-layout depends xdotool which can be installed by your package manager (e.g. `sudo apt-get install xdotool` on Debian or Ubuntu)
 
-To get started, install with `pip install i3-instant-layout`, or if you prefer, [pipx](https://github.com/pipxproject/pipx)
-and add this to your i3 config: 
-`bindsym $mod+Escape exec "i3-instant-layout --list | rofi -dmenu -i | i3-instant-layout -` (or use the interactive menu of your choice).
+Install with `pip install sway-instant-layout`, or if you prefer, [pipx](https://github.com/pipxproject/pipx).
 
+Add this to your sway config:
+```
+bindsym $mod+Escape exec "sway-instant-layout --list | wofi --dmenu | sway-instant-layout -"
+```
+(or use `rofi --dmenu -i` or any other dmenu-compatible launcher of your choice — rofi works on Wayland too).
+
+No external tools beyond sway's IPC are required.
 
 ## Further information
 
-Call `i3-instant-layout --help` for full details, or 
-`i3-instant-layout --desc` for the full list of supported layouts (or see below).
-
+Call `sway-instant-layout --help` for full details, or
+`sway-instant-layout --desc` for the full list of supported layouts (or see below).
 
 ## Helpful tips
 
@@ -50,19 +58,17 @@ Your current active window is what the tiler will consider the 'main window'.
 
 To get the other windows in the right order for your layout of choice,
 first enable the vStack or hStack layout, sort them,
-and the proceed to your layout of choice.
+and then proceed to your layout of choice.
 
-### Border styles
+### How it works (sway port)
 
-i3-instant-layout must unmap/map the windows (ie. hide them temporarily) for i3 
-to place them at the right location.
-Unfortunatly that appears to consume the border style.
-Work around this with a line like this in your i3 config:
-```
-for_window [class="^.*"] border pixel 1
-```
+Unlike the original i3 version, this port does **not** use `xdotool` or i3's window
+swallowing mechanism (which are X11-only). Instead it uses sway's IPC directly:
 
-
+1. All tiled windows in the workspace are moved to the scratchpad.
+2. Windows are placed back one by one using `split h/v`, `focus parent`, and
+   `layout tabbed` commands to build the target container tree.
+3. Focus is restored to the original active window.
 
 
 ## Available layouts
@@ -104,7 +110,7 @@ Layout: v2Stack
 Aliases: ['2col', '2c', '2v']
 
 Two columns of stacks
-	
+
 	-------------
 	|  1  |  4  |
 	-------------
@@ -121,7 +127,7 @@ Layout: h2Stack
 Aliases: ['2row', '2r', '2h']
 
 Two rows of stacks
-	
+
 	-------------------
 	|  1  |  2  |  3  |
 	-------------------
@@ -256,9 +262,6 @@ Aliases: []
 
 Place windows in a n * n matrix.
 
-The matrix will place swallow-markers
-if you have less than n*n windows.
-
 N is math.ceil(math.sqrt(window_count))
 
 
@@ -333,40 +336,6 @@ but never going below 1/16th of the size.
 	|           |     |  5  |
 	-------------------------
 
-	6 windows
-	-------------------------
-	|           |           |
-	|           |     2     |
-	|           |           |
-	|     1     |-----------|
-	|           |  3  |  4  |
-	|           |-----|-----|
-	|           |  5  |  6  |
-	-------------------------
-
-	7 windows
-	-------------------------
-	|           |     |     |
-	|           |  2  |  3  |
-	|           |     |     |
-	|     1     |-----------|
-	|           |  4  |  5  |
-	|           |-----|-----|
-	|           |  6  |  7  |
-	-------------------------
-
-
-	15 windows
-	-------------------------
-	|     |  2  |  4  |  6  |
-	|  1  |-----|-----|-----|
-	|     |  3  |  5  |  7  |
-	|-----------|-----------|
-	|  8  |  A  |  C  |  E  |
-	|-----|-----|-----|-----|
-	|  9  |  B  |  D  |  F  |
-	-------------------------
-
 Falls back to matrix layout above 16 windows.
 
 --------------------------------------------------------------------------------
@@ -374,7 +343,7 @@ Falls back to matrix layout above 16 windows.
 Layout: mainCenter
 
 Aliases: ['mc', 'vmv']
-One large window in the midle at 50%,
+One large window in the middle at 50%,
 all others stacked to the left/right vertically.
 
 	-------------------
@@ -387,3 +356,19 @@ all others stacked to the left/right vertically.
 
 --------------------------------------------------------------------------------
 
+Layout: mainTop
+
+Aliases: ['mt']
+
+One large window to the top at 50%,
+all others stacked horizontally below.
+
+	-------------
+	|           |
+	|     1     |
+	|           |
+	|-----|-----|
+	|  2  |  3  |
+	-------------
+
+--------------------------------------------------------------------------------
