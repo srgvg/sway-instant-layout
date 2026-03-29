@@ -38,6 +38,9 @@ it's 'instant'. Just press the button.
 
 ### Installation
 
+> **Note:** This package is not yet published on PyPI. Install directly from
+> GitHub using one of the methods below.
+
 **Recommended: [uv](https://docs.astral.sh/uv/)**
 
 ```bash

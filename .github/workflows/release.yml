@@ -1,9 +1,18 @@
-name: pytest
+# To re-enable PyPI publishing:
+#   1. Uncomment the 'release' trigger in the 'on:' block below.
+#   2. Remove the 'if: false' line from the upload_pypi job.
+#   3. Add a PyPI API token to GitHub repo Settings → Secrets → Actions
+#      as a secret named 'pypi_password'.
+#   4. Create a GitHub Release to trigger the workflow.
+
+name: build
+
 on:
     push:
-    release:
-     types:
-       - published
+    # Uncomment to trigger on GitHub Releases:
+    # release:
+    #   types:
+    #     - published
 
 
 jobs:
@@ -33,10 +42,10 @@ jobs:
   upload_pypi:
     needs: [build_sdist]
     runs-on: ubuntu-latest
-    # upload to PyPI on every tag starting with 'v'
-    #if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
-    # alternatively, to publish when a GitHub Release is created, use the following rule:
-    if: github.event_name == 'release' && github.event.action == 'published'
+    # Disabled until the project is published on PyPI.
+    # To re-enable: remove the 'if: false' line and uncomment the release trigger above.
+    if: false
+    # if: github.event_name == 'release' && github.event.action == 'published'
     steps:
       - uses: actions/download-artifact@v4
         with:
@@ -47,4 +56,5 @@ jobs:
         with:
           user: __token__
           password: ${{ secrets.pypi_password }}
-          # To test: repository_url: https://test.pypi.org/legacy/
+          # To test against TestPyPI first:
+          # repository_url: https://test.pypi.org/legacy/
